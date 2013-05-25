@@ -1,0 +1,5 @@
+
+latex single-variable.tex
+latex single-variable.tex
+dvips single-variable.dvi -o single-variable.ps
+ps2pdf single-variable.ps
