@@ -1,11 +1,12 @@
-\title{Note on Statistical Inference for AB-Testing}
+\title{Note on Bayesian Inference of a Single Variable}
 \author{
         James Kingsbery \\
-        Quantitative Engineering, Yodle
 }
 \date{\today}
 
 \documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
 
 \begin{document}
 \maketitle
@@ -22,17 +23,55 @@ Section~\ref{previous work} gives account of previous work.
 Our new and exciting results are described in Section~\ref{results}.
 Finally, Section~\ref{conclusions} gives the conclusions.
 
-\section{Previous Work}\label{previous work}
+\section{A Sample Survey}\label{samplesurvey}
+Suppose we are going to sample 100 individuals about a particular policy question (Z). Let $Y_i=1$ if person $i$
+supports the policy, and $Y_i=0$ otherwise. Assuming $Y_1,...,Y_100$ are iid binary random variables with expectation
+$\theta$, the joint distribution of $Pr(Y_1=y_1,...,Y_{100}=y_{100}|\theta)$ is:
 
+$$
+\sum_{i=1}^{100} Pr(Y_i=y_1|\theta) \\
+=Pr(\sum Y_i=y|\theta) \\
+={100 \choose \sum Y_i}\theta^{\sum Y_i}(1-\theta)^{100-\sum Y_i}
+$$
 
-\section{Frequentist Approach}
+We can make these simplifications because the variables are independent.
 
-\section{Objections to Frequentist Approach}
+Now, let us suppose we have reason to believe that $\theta \in {0.0,0.1,...,0.9,1.0}$ and we learn the results of the
+survey were $\sum_{i=1}^{100}Y_i=57$. The accompanying plots show what these distributions look like.
 
-\section{Bayesian Approach}
+If we assume that each of these are a priori equally likely, then we can use Bayes theorem to estimate our beliefs of the likelihood for each theta. First, though, we calcule $p(Y=57)$. Since in this case the values of $\theta$ are discrete,
 
-\section{Conclusions}
+$$
+p(Y=57)=\frac{1}{11}\sum_{\theta \in {0.0,0.1,...,1.0}} \theta^{57}(1-\theta)^{43}
+$$
 
+Putting everything together, we have:
+
+$$
+p(\theta | Y=57)= \frac{P(Y=57 | \theta)p(\theta)} {p(Y=57)} \\
+=\frac{{100 \choose 57} \theta^{57}(1-\theta)^{43} \frac{1}{11}}{\frac{1}{11}{100 \choose 57}   \sum_{\theta} \theta^{57}(1-\theta)^{43}} \\
+=\frac{\theta^{57}(1-\theta)^{43}}{\sum_{\theta} \theta^{57}(1-\theta)^{43}}
+$$
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth,natwidth=610,natheight=642]{figure1.pdf}
+\end{figure}
+
+We perform a couple sanity checks. First, we notice that the sum of all the probabilities does indeed equal 1. Second, we see that most of the posterior distribution lies around 0.5 and 0.6.
+
+Now, let us consider the uniform continuous distribution. We then have that
+
+$$
+p(\theta | Y=57)=Beta(\theta,1+57,1+100-57)
+$$
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth,natwidth=610,natheight=642]{figure2.pdf}
+\end{figure}
+
+We note, and can see both visually in the plots and confirm analytically, that whether we use a continuous uniform prior or a discrete one, the two resulting probability distributions have the same shape but a different scale.
 
 \bibliographystyle{abbrv}
 \bibliography{main}
