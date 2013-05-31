@@ -23,7 +23,7 @@ Section~\ref{previous work} gives account of previous work.
 Our new and exciting results are described in Section~\ref{results}.
 Finally, Section~\ref{conclusions} gives the conclusions.
 
-\section{A Sample Survey}\label{samplesurvey}
+\section{Binomial Estimation}\label{samplesurvey}
 Suppose we are going to sample 100 individuals about a particular policy question (Z). Let $Y_i=1$ if person $i$
 supports the policy, and $Y_i=0$ otherwise. Assuming $Y_1,...,Y_100$ are iid binary random variables with expectation
 $\theta$, the joint distribution of $Pr(Y_1=y_1,...,Y_{100}=y_{100}|\theta)$ is:
@@ -60,7 +60,7 @@ $$
 
 We perform a couple sanity checks. First, we notice that the sum of all the probabilities does indeed equal 1. Second, we see that most of the posterior distribution lies around 0.5 and 0.6.
 
-Now, let us consider the uniform continuous distribution. We then have that
+Now, let us consider the uniform continuous distribution. We then have that:
 
 $$
 p(\theta | Y=57)=Beta(\theta,1+57,1+100-57)
@@ -72,6 +72,87 @@ $$
 \end{figure}
 
 We note, and can see both visually in the plots and confirm analytically, that whether we use a continuous uniform prior or a discrete one, the two resulting probability distributions have the same shape but a different scale.
+
+When examining a binomial variable like survey results, we often want to compare two similar variables. For example, we may want to know how likely it is that people in a neighboring county or state are more likely to support the policy question. Let us say that the $\theta$ from before is $\theta_1$, and the likelihood for support in the neighboring county is $\theta_2$. Then, we are looking to find out $Pr(\theta_1<\theta_2)$. This is difficult to do analytically, so we will be using Monte Carlo simulation.
+
+Let us say that we have a uniform prior for $\theta_2$, but then a poll of 50 people showed 30 in support. Then we have $Pr(\theta_2 | Y_2=30)=Beta(\theta_2,1+30,1+50-30)$. If we assume that $\theta_1$ and $theta_2$ are independent, then we can sample from their posterior distributions directly. In doing this, we get an answer of about 63\%. (See attached R code).
+
+Finally, let us consider the effect that the choice of a prior has. To make this easier to interpret, instead of a and b, we will look at $n_0$ and $\theta_0$, the number of prior observations and prior probability respectively. How does viewing $Y=57$ affect a variety of choice of $n_0$ and $\theta_0$? By examining \ref{contour}, we see that for all but the strongest, most pessimistic estimates of $\theta_1$, it is very likely that the majority are in favor of the policy question.
+
+\begin{figure}
+    \label{contour}
+    \centering
+    \includegraphics[width=0.8\textwidth,natwidth=610,natheight=642]{figure3.pdf}
+\end{figure}
+
+
+\section{Count Data Estimation}
+When we want to model the question \emph{how many?}, we are dealing with a counting problem. Consider as an example, a lab that uses mice to study cancer tumor counts. One type of mouse, type A, is known to have tumor counts that are Poisson distributed with mean 12. 
+
+Let us consider the most basic Bayesian analysis: from the literature, we have relatively strong prior expectations ($gamma(120,10)$) about the A population tumor rate ($\theta_A$) and relatively week prior expectations ($gamma(12,1)$) about the tumor rate for population B ($\theta_B$), and that we've run an experiment with the tumor rates from Table \ref{tab:tumorcounts}.
+
+\begin{table}
+\caption {Population Tumor Counts} \label{tab:tumorcounts}
+\begin{center}
+\begin{tabular}{| l | l |}
+\hline
+$y_A$ & 12,9,12,14,13,13,15,8,15,6 \\
+\hline
+$y_B$ & 11,11,10,9,9,8,7,10,6,8,8,9,7 \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+First, let us consider some of the important descriptive statistics.
+
+\begin{table}
+\caption {Posterior Descriptive Statistics} \label{tab:tumorcountstats}
+\begin{center}
+\begin{tabular}{| l | l | l |}
+\hline
+ & A & B \\
+\hline
+Posterior & gamma(237,20) & gamma(125,14) \\
+\hline
+mean & 11.85 & 8.9285714 \\
+\hline
+variance & 0.5925  &  0.6377551 \\
+\hline
+95\% Confidence Interval & 10.39-13.41 & 7.43-10.56 \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+Second, let us consider different priors for the tumor rate in popluation B. The plot in table TODO shows that for the prior $gamma(12*n_0,n_0)$, for $n_0$ from 1 to 50, the posterior mean is still much less for the B group than for the A group, meaning that even with very strong priors to the contrary, the B group has a lower mean.
+
+
+
+\subsection{Adaquacy of Poisson Model}
+Before using any Poisson model, we want to test its goodness-of-fit for the question before us. For example, suppose we cared to make statements about the ratio between the mean and the standard deviation of the tumor counts for the two different populations. We can use Monte Carlo simulations against the posterior predictive model to answer the question.
+
+What we observe is that for the A population, the observed ratio between mean and standard deviation is approximately 3.87, which is between the 60\% and 65\% quantile. For the B population, we observe a ratio of approximately 5.6, and we observe a ratio of that or more extreme from the Poisson distribution 2\% of the time.
+
+So, in this case, we say that the Poisson model is adequate for the A population \emph{for questions regarding the ratio between mean and standard deviation}, but we make no claims more general than that. For the B population, the Poisson model is unlikely to be appropriate for this problem, but again, it may be useful when considering other questions.
+
+\subsection{Differences in Population}
+For any two populations, a common question is how likely it is that the two are different. Running Monte Carlo simulations on the posterihetor distributions from above, we can examine $p(\theta_A>\theta_B|y_A,y_B)$.
+
+TODO: code
+
+We see from running this code that $p(\theta_A>\theta_B|y_A,y_B)=99.5\%$
+
+\subsection{Differences in Members of Population}
+If we want to compare members of the population instead of the parameters of the population, we will need to run a Monte Carlo simulation from the posterior predictive model (instead of the posterior model for the parameter).
+
+From this simulation, we see that the member from the A population will have more tumors approximately 70\% of the time.
+
+\subsection{Independence of $Y_A$ and $Y_B$}
+
+Next, let us consider whether the assumption of independence between $Y_A$ and $Y_B$ makes sense.
+
 
 \bibliographystyle{abbrv}
 \bibliography{main}
